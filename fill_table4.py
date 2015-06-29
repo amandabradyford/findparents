@@ -4,7 +4,11 @@ import MySQLdb
 import json 
 import re
 
+#THIS CODE IS TO FILL A SQL TABLE WITH BUSINESSES, REVIEWS ETC THAT CAN BE QUERIED LATER...
+#EACH REVIEW GETS A FLAG OF 1 OR 0, THOSE FLAGS GET PROPAGATED ACROSS ALL REVIEWS LATER
 
+
+#fill a sql table with user information
 def filluser(path,db): #review set
     cursor = db.cursor()
     reviewdataset=[]
@@ -15,9 +19,10 @@ def filluser(path,db): #review set
     print len(reviewdataset)
     
 
-    cursor.execute("DROP TABLE IF EXISTS USER4")
+    cursor.execute("DROP TABLE IF EXISTS USER4") #to keep things clean, drop any prior versions of the table
     
-    sql = """CREATE TABLE USER4 (
+    #create a user table
+    sql = """CREATE TABLE USER4 ( 
              USERID VARCHAR(1000),
              REVIEWTEXT TEXT,
              BUSINESSID VARCHAR(1000),
@@ -26,12 +31,14 @@ def filluser(path,db): #review set
 
     cursor.execute(sql)
     
+    #POSSESIVE WORD + KID WORD (INCLUDES 'MY {SPOUSE} AND' + 
+    
     pattern = ['my kid', 'my kids', 'my son', 'my sons', 'my daughter', 'my daughters', 'my baby', 'my babies', 
  		   'my child', 'my children', 'my baby', 'our kid', 'our kids', 'our son','our sons', 'our babies',
  		   'our daughter','our daughters','our son and daughter', 'our daughter and son', 'my wife and son', 'my wife and sons', 'my wife and daughter', 
  		   'my wife and daughters', 'my wife and kids', 'my husband and son', 'my husband and sons', 'my husband and daughter', 
  		   'my husband and daughters', 'my husband and kids', 'my hubby and son', 'my hubby and sons', 'my hubby and daughter', 
- 		   'my hubby and daughters', 'my hubby and kids', 'i\'m a parent', 'as a parent', 'i am a parent', 'i have kids']
+ 		   'my hubby and daughters', 'my hubby and kids', 'i\'m a parent', 'as a parent', 'i am a parent', 'i have kids'] #THOSE LAST 4 ARE OPTIONAL
 		   
     combined = "(" + ")|(".join(pattern) + ")"
     
@@ -40,12 +47,12 @@ def filluser(path,db): #review set
     count=0
     
     for review in reviewdataset:   					   	
-        flag=0
-        match = re.search(combined,review['text'],re.IGNORECASE) #i think this should work...
+        flag=0 #initial flag is zero 
+        match = re.search(combined,review['text'],re.IGNORECASE) #i think this should work... YES! IT DOES
         if match:
             #print "the match is"
             #print match.group()
-            flag=1
+            flag=1 #change flag to 1 if there is a match to the pattern
             count += 1
         else:
             flag=0
@@ -68,6 +75,7 @@ def filluser(path,db): #review set
     print 'and the count is'     
     print count
    
+#fill a sql table with business information
 def fillbusiness(path,db):
  
     businessdataset=[]
@@ -92,7 +100,7 @@ def fillbusiness(path,db):
          
     cursor.execute(sql)
     
-    regexes = ['AZ', 'NV','WI','IL','NC','PA']
+    regexes = ['AZ', 'NV','WI','IL','NC','PA'] #only interested in reviews of U.S. businesses
     combined = "(" + ")|(".join(regexes) + ")"
 
     for business in businessdataset: 
@@ -124,6 +132,7 @@ if __name__ == '__main__':
     userpath = '/Users/aford/yelp/yelp_academic_dataset_review.json' #getting user data from review file
     businesspath = '/Users/aford/yelp/yelp_academic_dataset_business.json'
 
+#use these smaller datasets for testing purposes... 
 #    businesspath = '/Users/aford/yelp/business10k.json'
 #    userpath = '/Users/aford/yelp/review10k.json' #getting user data from review file!
     
