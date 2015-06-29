@@ -1,0 +1,14 @@
+#example of ways to shorten the time of sql queries by using subqueries...
+
+select * from parents_ONLY join business4 ON parents_ONLY.BUSINESSID=business4.bid WHERE STATE='AZ' AND Category='Doctors'
+
+
+SELECT * from parents_ONLY join (select * from business4 WHERE state='AZ' AND Category='Doctors') minisample 
+         ON parents_ONLY.BUSINESSID=minisample.bid 
+
+
+# number of reviews by parents relative to full number of reviews.
+
+
+SELECT COUNT(*) from parents_ONLY join (select * from business4 WHERE state='AZ') minisample 
+         ON parents_ONLY.BUSINESSID=minisample.bid 
